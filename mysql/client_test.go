@@ -14,7 +14,7 @@ func TestInsert(t *testing.T) {
 	}
 }
 
-func TestFind(t *testing.T) {
+func TestFindOne(t *testing.T) {
 	// 2015-08-16 13:57:11
 	createAt := time.Date(2015, time.August, 16, 13, 57, 11, 0, time.UTC)
 	expect := &User{Id: 2, Name: "hoge", CreateAt: createAt}
@@ -25,5 +25,23 @@ func TestFind(t *testing.T) {
 
 	if !(expect.Id == actual.Id && expect.Name == actual.Name && expect.CreateAt == actual.CreateAt) {
 		t.Errorf("expect not equal actual %v=%v", expect, actual)
+	}
+}
+
+func TestFindOne_not_found(t *testing.T) {
+	actual, err := FindOne(-1)
+	if err != nil {
+		t.Errorf("an error occurred. %v", err)
+	}
+
+	if actual != nil {
+		t.Errorf("found some data")
+	}
+}
+
+func TestFind(t *testing.T) {
+	_, err := Find("hoge")
+	if err != nil {
+		t.Errorf("an error occurred. %v", err)
 	}
 }

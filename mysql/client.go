@@ -2,8 +2,9 @@ package mysql
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"log"
+	_ "time"
 )
 
 func getDb() (*sql.DB, error) {
@@ -11,7 +12,7 @@ func getDb() (*sql.DB, error) {
 
 }
 
-// getSequence get sequcence number
+// getSequence get sequence number
 func getSequence(tx *sql.Tx) (id uint64, err error) {
 	if _, err := tx.Query("UPDATE seq SET id = LAST_INSERT_ID(id + 1)"); err != nil {
 		return 0, err
@@ -97,9 +98,69 @@ func FindOne(id int64) (*User, error) {
 	}()
 	user := new(User) // ポインタを返却
 
-	if err := stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.CreateAt); err != nil {
+	err = stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.CreateAt)
+
+	if err != nil && err != sql.ErrNoRows {
 		log.Printf("scan error %v\n", err)
 		return nil, err
+
+		// data not found
+	} else if err != nil && err == sql.ErrNoRows {
+		return nil, nil
 	}
+
 	return user, nil
+}
+
+func Find(name string) ([]*User, error) {
+	db, err := getDb()
+	defer db.Close()
+	if err != nil {
+		log.Printf("can not get database. %v\n", err.Error())
+		return nil, err
+	}
+	stmt, err := db.Prepare("SELECT id, name,createAt,memo, use_point FROM user WHERE name like ?")
+	if err != nil {
+		log.Printf("statement error %v\n", err.Error())
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(name)
+	defer rows.Close()
+	if err != nil {
+		log.Printf("statement error %v\n", err.Error())
+		return nil, err
+	}
+
+	//	columns, err := rows.Columns()
+	_, err = rows.Columns()
+	if err != nil {
+		log.Printf("cannot get columns%v\n", err.Error())
+		return nil, err
+	}
+	//	values := make([]sql.RawBytes, len(columns))
+	//	scanArgs := make([]interface{}, len(values))
+	//	for i := range values {
+	//		scanArgs[i] = &values[i]
+	//	}
+
+	// TODO: int などの値のnull値をどうやって表す?
+	// uint64とかではなくてラップすべきか
+	for rows.Next() {
+		//		user := new(User)
+		var (
+			id        uint64
+			name      string
+			createAt  mysql.NullTime
+			memo      sql.NullString
+			use_point sql.NullInt64
+		)
+		if err := rows.Scan(&id, &name, &createAt, &memo, &use_point); err != nil {
+			log.Printf("cannot scan %v\n", err.Error())
+			return nil, err
+		}
+		log.Println(id, name, createAt, memo, use_point)
+	}
+	return nil, nil
 }
