@@ -14,7 +14,7 @@ func randomTime() time.Duration {
 func worker(msg string) <-chan string {
 	receiver := make(chan string)
 
-	for i := 0; i<300; i++ {
+	for i := 0; i < 300; i++ {
 		go func(i int) {
 			time.Sleep(randomTime())
 			msg := fmt.Sprintf("%d %s done", i, msg)

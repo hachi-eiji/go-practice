@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/go-sql-driver/mysql"
 	"log"
-	_ "time"
+	//	_ "time"
 )
 
 func getDb() (*sql.DB, error) {
@@ -112,6 +112,7 @@ func FindOne(id int64) (*User, error) {
 	return user, nil
 }
 
+// Find is executing select query
 func Find(name string) ([]*User, error) {
 	db, err := getDb()
 	defer db.Close()
@@ -150,17 +151,29 @@ func Find(name string) ([]*User, error) {
 	for rows.Next() {
 		//		user := new(User)
 		var (
-			id        uint64
-			name      string
-			createAt  mysql.NullTime
-			memo      sql.NullString
-			use_point sql.NullInt64
+			id       uint64
+			name     string
+			createAt mysql.NullTime
+			memo     sql.NullString
+			usePoint sql.NullInt64 // TODO: bigint unsigned の時どうする
 		)
-		if err := rows.Scan(&id, &name, &createAt, &memo, &use_point); err != nil {
+		if err := rows.Scan(&id, &name, &createAt, &memo, &usePoint); err != nil {
 			log.Printf("cannot scan %v\n", err.Error())
 			return nil, err
 		}
-		log.Println(id, name, createAt, memo, use_point)
+
+		user := User{Id: id, Name: name}
+
+		if createAt.Valid {
+			user.CreateAt = createAt.Time
+		}
+		if memo.Valid {
+			user.Memo = memo.String
+		}
+		if usePoint.Valid {
+			user.UsePoint = usePoint.Int64
+		}
+		log.Printf("%v", user)
 	}
 	return nil, nil
 }
