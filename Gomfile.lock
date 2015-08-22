@@ -1,0 +1,1 @@
+gom 'github.com/go-sql-driver/mysql', :commit => '3dd7008ac1529aca1bcd8a9db75228a71ba23cac'
