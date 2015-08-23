@@ -44,11 +44,12 @@ func TestFindOne_not_found(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	actuals, err := Find("hoge")
+	var users []User
+	err := Find(&users, "hoge")
 	if err != nil {
 		t.Errorf("an error occurred. %v", err)
 	}
-	for i, v := range *actuals {
-		fmt.Printf("%v, %v\n", i, v)
+	for i, v := range users {
+		fmt.Printf("%v, %v %d\n", i, v)
 	}
 }

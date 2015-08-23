@@ -113,17 +113,17 @@ func FindOne(id int64) (*User, error) {
 }
 
 // Find is executing select query
-func Find(name string) (*[]User, error) {
+func Find(users *[]User, name string) error {
 	db, err := getDb()
 	defer db.Close()
 	if err != nil {
 		log.Printf("can not get database. %v\n", err.Error())
-		return nil, err
+		return err
 	}
 	stmt, err := db.Prepare("SELECT id, name,createAt,memo, use_point FROM user WHERE name like ?")
 	if err != nil {
 		log.Printf("statement error %v\n", err.Error())
-		return nil, err
+		return err
 	}
 	defer stmt.Close()
 
@@ -131,16 +131,16 @@ func Find(name string) (*[]User, error) {
 	defer rows.Close()
 	if err != nil {
 		log.Printf("statement error %v\n", err.Error())
-		return nil, err
+		return err
 	}
 
 	//	columns, err := rows.Columns()
 	_, err = rows.Columns()
 	if err != nil {
 		log.Printf("cannot get columns%v\n", err.Error())
-		return nil, err
+		return err
 	}
-	results := make([]User, 0)
+	//	results := make([]User, 0)
 	for rows.Next() {
 		//		user := new(User)
 		var (
@@ -152,7 +152,7 @@ func Find(name string) (*[]User, error) {
 		)
 		if err := rows.Scan(&id, &name, &createAt, &memo, &usePoint); err != nil {
 			log.Printf("cannot scan %v\n", err.Error())
-			return nil, err
+			return err
 		}
 
 		user := User{Id: id, Name: name}
@@ -167,7 +167,7 @@ func Find(name string) (*[]User, error) {
 		if usePoint != nil {
 			user.UsePoint = usePoint
 		}
-		results = append(results, user)
+		*users = append(*users, user)
 	}
-	return &results, nil
+	return nil
 }
