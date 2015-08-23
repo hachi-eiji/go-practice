@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/go-sql-driver/mysql"
 	"log"
-	//	_ "time"
+	//	"time"
 )
 
 func getDb() (*sql.DB, error) {
@@ -113,7 +113,7 @@ func FindOne(id int64) (*User, error) {
 }
 
 // Find is executing select query
-func Find(name string) ([]*User, error) {
+func Find(name string) (*[]User, error) {
 	db, err := getDb()
 	defer db.Close()
 	if err != nil {
@@ -140,14 +140,7 @@ func Find(name string) ([]*User, error) {
 		log.Printf("cannot get columns%v\n", err.Error())
 		return nil, err
 	}
-	//	values := make([]sql.RawBytes, len(columns))
-	//	scanArgs := make([]interface{}, len(values))
-	//	for i := range values {
-	//		scanArgs[i] = &values[i]
-	//	}
-
-	// TODO: int などの値のnull値をどうやって表す?
-	// uint64とかではなくてラップすべきか
+	results := make([]User, 0)
 	for rows.Next() {
 		//		user := new(User)
 		var (
@@ -155,7 +148,7 @@ func Find(name string) ([]*User, error) {
 			name     string
 			createAt mysql.NullTime
 			memo     sql.NullString
-			usePoint sql.NullInt64 // TODO: bigint unsigned の時どうする
+			usePoint *uint64
 		)
 		if err := rows.Scan(&id, &name, &createAt, &memo, &usePoint); err != nil {
 			log.Printf("cannot scan %v\n", err.Error())
@@ -165,15 +158,16 @@ func Find(name string) ([]*User, error) {
 		user := User{Id: id, Name: name}
 
 		if createAt.Valid {
-			user.CreateAt = createAt.Time
+			user.CreateAt = &createAt.Time
 		}
 		if memo.Valid {
-			user.Memo = memo.String
+			user.Memo = &memo.String
 		}
-		if usePoint.Valid {
-			user.UsePoint = usePoint.Int64
+
+		if usePoint != nil {
+			user.UsePoint = usePoint
 		}
-		log.Printf("%v", user)
+		results = append(results, user)
 	}
-	return nil, nil
+	return &results, nil
 }

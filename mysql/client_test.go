@@ -1,10 +1,14 @@
 package mysql
 
-import "testing"
-import "time"
+import (
+	"fmt"
+	"testing"
+	"time"
+)
 
 func TestInsert(t *testing.T) {
-	user := &User{Name: "bar", CreateAt: time.Now()}
+	now := time.Now()
+	user := &User{Name: "bar", CreateAt: &now}
 	ret, err := Insert(user)
 	if err != nil {
 		t.Errorf("an error occurred. %v", err)
@@ -17,13 +21,13 @@ func TestInsert(t *testing.T) {
 func TestFindOne(t *testing.T) {
 	// 2015-08-16 13:57:11
 	createAt := time.Date(2015, time.August, 16, 13, 57, 11, 0, time.UTC)
-	expect := &User{Id: 2, Name: "hoge", CreateAt: createAt}
+	expect := &User{Id: 2, Name: "hoge", CreateAt: &createAt}
 	actual, err := FindOne(2)
 	if err != nil {
 		t.Errorf("an error occurred. %v", err)
 	}
 
-	if !(expect.Id == actual.Id && expect.Name == actual.Name && expect.CreateAt == actual.CreateAt) {
+	if !(expect.Id == actual.Id && expect.Name == actual.Name && *expect.CreateAt == *actual.CreateAt) {
 		t.Errorf("expect not equal actual %v=%v", expect, actual)
 	}
 }
@@ -40,8 +44,11 @@ func TestFindOne_not_found(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	_, err := Find("hoge")
+	actuals, err := Find("hoge")
 	if err != nil {
 		t.Errorf("an error occurred. %v", err)
+	}
+	for i, v := range *actuals {
+		fmt.Printf("%v, %v\n", i, v)
 	}
 }
