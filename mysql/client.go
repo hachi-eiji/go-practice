@@ -1,15 +1,52 @@
 package mysql
 
 import (
+	"bytes"
 	"database/sql"
+	"github.com/BurntSushi/toml"
 	"github.com/go-sql-driver/mysql"
 	"log"
-	//	"time"
+	"os"
+	"text/template"
 )
 
-func getDb() (*sql.DB, error) {
-	return sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=true&columnsWithAlias=true")
+type config struct {
+	Master dbConfig `toml:"master"`
+	Slave  dbConfig
+}
 
+type dbConfig struct {
+	User     string `toml:"user"`
+	Password string `toml:"password"`
+	Host     string `toml:"host"`
+	Port     string `toml:"port"`
+	Name     string `toml:"db"`
+	Param    string `toml:"param"`
+}
+
+var appConfig config
+
+func loadConfig() {
+	if &appConfig == nil {
+		return
+	}
+	_, err := toml.DecodeFile(os.Getenv("appConf"), &appConfig)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func getDb() (*sql.DB, error) {
+	loadConfig()
+	tmpl, err := template.New("test").Parse("{{.User}}:{{.Password}}@tcp({{.Host}}:{{.Port}})/{{.Name}}?{{.Param}}")
+	if err != nil {
+		return nil, err
+	}
+	var url bytes.Buffer
+	if err := tmpl.Execute(&url, appConfig.Master); err != nil {
+		return nil, err
+	}
+	return sql.Open("mysql", url.String())
 }
 
 // getSequence get sequence number

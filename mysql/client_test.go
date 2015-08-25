@@ -2,9 +2,15 @@ package mysql
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 )
+
+func init() {
+	// set env
+	os.Setenv("appConf", "app_test.toml")
+}
 
 func TestInsert(t *testing.T) {
 	now := time.Now()
