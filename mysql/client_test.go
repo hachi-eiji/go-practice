@@ -50,12 +50,21 @@ func TestFindOne_not_found(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	var users []User
-	err := Find(&users, "hoge")
+	users, err := Find("hoge")
 	if err != nil {
 		t.Errorf("an error occurred. %v", err)
 	}
 	for i, v := range users {
 		fmt.Printf("%v, %v %d\n", i, v)
+	}
+}
+
+func TestFind_not_found(t *testing.T) {
+	users, err := Find("not_found")
+	if err != nil {
+		t.Errorf("an error occurred. %v", err)
+	}
+	if len(users) != 0 {
+		t.Errorf("data found %v.", users)
 	}
 }
