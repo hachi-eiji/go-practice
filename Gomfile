@@ -1,2 +1,3 @@
 gom 'github.com/go-sql-driver/mysql'
 gom 'github.com/BurntSushi/toml'
+gom 'github.com/naoina/genmai'
