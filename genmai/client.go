@@ -4,22 +4,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/naoina/genmai"
 	"log"
-	"os"
 	_ "time"
 )
 
 type Seq struct {
 	Id uint64 `db:pk default:0`
-}
-
-func getDb() (*genmai.DB, error) {
-	url := "root:root@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=true"
-	db, err := genmai.New(&genmai.MySQLDialect{}, url)
-	if err != nil {
-		return nil, err
-	}
-	db.SetLogOutput(os.Stdout)
-	return db, nil
 }
 
 func getSequence(db *genmai.DB) (uint64, error) {
@@ -45,7 +34,7 @@ func getSequence(db *genmai.DB) (uint64, error) {
 
 // Insert record into user table. return affected row amount
 func Insert(user *User) (res int64, err error) {
-	db, err := getDb()
+	db, err := GetDb()
 	if err != nil || db == nil {
 		log.Printf("cannot get datasource. %v", err)
 		return 0, err
@@ -85,7 +74,7 @@ func Insert(user *User) (res int64, err error) {
 
 // FindOne execute select * from user where id = ?
 func FindOne(id uint64) (*User, error) {
-	db, err := getDb()
+	db, err := GetDb()
 	defer db.Close()
 	if err != nil {
 		return nil, err
@@ -102,7 +91,7 @@ func FindOne(id uint64) (*User, error) {
 }
 
 func Find(name string) ([]User, error) {
-	db, err := getDb()
+	db, err := GetDb()
 	if err != nil {
 		return nil, err
 	}

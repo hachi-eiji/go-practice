@@ -17,3 +17,12 @@ create table user (
 );
 
 insert into user(id,name,create_at,memo,use_point)values(1,'test',now(),'memo',0);
+
+create table user_account (
+  id bigint unsigned,
+  account_type enum('twitter', 'facebook', 'github') not null,
+  account_name varchar(100) not null,
+  primary key (id, account_type)
+);
+
+insert into user_account(id, account_type, account_name)values( 1, 'twitter', 'test_twitter'),(1,'facebook','test_fb');
