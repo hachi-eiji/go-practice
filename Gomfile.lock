@@ -1,3 +1,0 @@
-gom 'github.com/go-sql-driver/mysql', :commit => '3dd7008ac1529aca1bcd8a9db75228a71ba23cac'
-gom 'github.com/BurntSushi/toml'
-gom 'github.com/naoina/genmai', :commit => 'c00e6703a1503c09dca12048bf17961b13511c0f'
