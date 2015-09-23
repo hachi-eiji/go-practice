@@ -33,7 +33,7 @@ func Insert(user *User) (res uint64, err error) {
 		return 0, err
 	}
 	user.Id = id
-	r := db.Create(&user)
+	r := db.Create(user)
 	if err := r.Error; err != nil {
 		return 0, err
 	}
